@@ -1,0 +1,4 @@
+# START CRON JOB
+* * * * * /usr/bin/python3 /app/cron_meteo_concept/meteo_concept_xtract.py > /proc/1/fd/1 2>/proc/1/fd/2
+* * * * * /usr/bin/python3 /app/cron_meteo_concept/meteo_concept_preproc.py > /proc/1/fd/1 2>/proc/1/fd/2
+# END CRON JOB

@@ -1,0 +1,7 @@
+pandas==2.0.3
+numpy==1.22.0
+requests== 2.22.0
+fastapi==0.63.0
+uvicorn==0.13.3
+keras-tcn==3.5.0
+tensorflow==2.13.0
