@@ -25,7 +25,5 @@ def run():
         else:
             # Appel API
             # Pour l'instant, on va juste appeler le endpoint de base qui renvoie un message de bienvenue
-            r = requests.get(url='http://{address}:{port}/'.format(address=api_address, port=api_port),
-                             params= {'username': 'daniel',
-                                      'password': 'datascientest'})
+            r = requests.get(url='http://{address}:{port}/'.format(address=api_address, port=api_port))
             st.info(r.text)            
