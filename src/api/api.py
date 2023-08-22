@@ -153,7 +153,7 @@ async def __ (auth_details: AuthDetails):
 # Chargement de la BDD
 def select_data(Localite, DateModele, Start, End):
     global df_all
-    df_all = pd.read_json(dirname(dirname(abspath(__file__)))+"/data/model/model_bretagne_db.json")
+    df_all = pd.read_json(dirname(dirname(dirname(abspath(__file__))))+"/data/model/model_bretagne_db.json")
     df = df_all.loc[(df_all['localite'] == Localite) & (df_all['date model'] == DateModele) & (df_all['id jour'] >= Start) & ( df_all['id jour'] <= End),:]
     return(df)
     
