@@ -51,7 +51,7 @@ API développée par Label éCO2
 
 ## Fonction modèle de prévision :
 * Saisir une localité et une période de prédiction
-* Vous pourrez XXXXXXXXXXX
+* Générer un fichier csv contenant la consommation électrique en MW
 
 """
 , openapi_tags=tags_metadata)
