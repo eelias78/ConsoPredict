@@ -21,6 +21,7 @@ import pandas as pd
 
 import os
 import json
+from os.path import dirname, abspath
 
 # Pour la création & visualisation de la database utilisateurs 
 import models
@@ -149,14 +150,10 @@ async def __ (auth_details: AuthDetails):
     BLOC : SAISIE DE LA LOCALISATION 
 """""""""""""""""""""""""""""""""""""""""
 
-# Répertoire où se trouve la BDD JSON
-os.chdir("..")
-model_path = os.path.abspath(os.curdir)
-
 # Chargement de la BDD
 def select_data(Localite, DateModele, Start, End):
     global df_all
-    df_all = pd.read_json(model_path +"/data/model/model_bretagne_db.json")
+    df_all = pd.read_json(dirname(dirname(abspath(__file__)))+"/data/model/model_bretagne_db.json")
     df = df_all.loc[(df_all['localite'] == Localite) & (df_all['date model'] == DateModele) & (df_all['id jour'] >= Start) & ( df_all['id jour'] <= End),:]
     return(df)
     
