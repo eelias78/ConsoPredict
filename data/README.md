@@ -1,4 +1,4 @@
-# Dossier : raw_build_model
+# Dossier : raw_dev_model
 # Fichier : Data_Bretagne.csv
     - Contenu : Données météorologiques journalières observées toutes les 6h 
     - Source de données : Météonet 
@@ -8,7 +8,7 @@
     - Région retenue : Bretagne
     
 
-# Dossier : raw_build_model
+# Dossier : raw_dev_model
 # Fichier : Conso_Bretagne.csv
     - Contenu :  données éCO2mix régionales consolidées et définitives de la consommation électrique au pas demi-heure
     - Source de données : Odré 
@@ -19,7 +19,7 @@
     - Région retenue : Bretagne
 
 
-# Dossier : raw_prediction
+# Dossier : raw_for_prediction
 # Fichier : meteo_concept_dt_val_xxxx
     - Contenu : Extraction brute de l'api Météo concept (données météorologiques yc la température)
     - Période d'observation disponible : 14 jours (jour d'extraction inclus) 
