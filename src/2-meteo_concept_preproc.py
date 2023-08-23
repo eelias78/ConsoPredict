@@ -14,7 +14,7 @@ dt_fic = now.strftime("%Y-%m-%d")
 in_data_dir = dirname(dirname(abspath(__file__)))  # chemin
 
 # Chargement de la BDD météo et filtre sur la région Bretagne
-json = pd.read_json(in_data_dir +"/data/raw/meteo_concept_dt_val_"+ dt_fic+".json")
+json = pd.read_json(in_data_dir +"/data/raw_4_prediction/meteo_concept_dt_val_"+ dt_fic+".json")
 json['date model']= pd.to_datetime(json['date_val'])
 bretagne = json.loc[json['region']=='Bretagne'].reset_index(drop=True)
 

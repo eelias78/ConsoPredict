@@ -43,6 +43,6 @@ df['date_val']= now.strftime('%Y-%m-%d')
 dt_fic = now.strftime("%Y-%m-%d")
 
 # Stockage des prévisions dans un fichier json
-file_path= dirname(dirname(abspath(__file__))) + "/data/raw/meteo_concept_dt_val_"
+file_path= dirname((dirname(abspath(__file__)))) + "/data/raw_4_prediction/meteo_concept_dt_val_"
 df.to_json(file_path + dt_fic + '.json',orient="records")
 print(pd.read_json(file_path + dt_fic + '.json'))

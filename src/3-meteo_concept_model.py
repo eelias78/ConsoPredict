@@ -16,7 +16,8 @@ dt_fic = now.strftime("%Y-%m-%d")
 
 # Répertoires 
 in_data_dir = dirname(dirname(abspath(__file__)))  + '/data/processed/' # BDD processed data
-in_model = dirname(dirname(abspath(__file__)))  + '/model/' # Paraètres modèles
+out_data_dir = dirname(dirname(abspath(__file__)))  + '/data/pred_model/' # BDD modelled data
+in_model = dirname(dirname(abspath(__file__)))  + '/model/' # Paramètres modèles
 
 # Chargement de la BDD
 bretagne = pd.read_json(in_data_dir +"processed_bretagne_"+ dt_fic+".json", orient = 'columns')
@@ -75,6 +76,6 @@ df['jour predit'] = df.index.rename('jour predit') + 1
 df = df.reset_index(names='id jour')
 df = df[['localite','date prediction','jour predit','id jour','conso(MW)', 'date model']]
 
-df.to_json(in_data_dir +"model_bretagne_"+ dt_fic +".json", orient="records")
+df.to_json(out_data_dir +"model_bretagne_"+ dt_fic +".json", orient="records")
 
 print(df)
