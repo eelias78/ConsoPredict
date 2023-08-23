@@ -28,7 +28,7 @@
 
 # Dossier : processed
 # Fichier : processed_bretagne_yyyy-mm-dd
-    - Contenu : Données pré-traitées provenant du fichier meteo_concept_dt_val_xxxx
+    - Contenu : Données pré-traitées provenant du fichier meteo_concept_dt_val_yyyy-mm-dd
     - Date d'observation : xxxx
 
 # Dossier : pred_model
