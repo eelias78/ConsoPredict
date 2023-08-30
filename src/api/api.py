@@ -153,7 +153,8 @@ async def __ (auth_details: AuthDetails):
 # Chargement de la BDD
 def select_data(Localite, DateModele, Start, End):
     global df_all
-    df_all = pd.read_json(dirname(dirname(dirname(abspath(__file__))))+"/data/model/model_bretagne_db.json")
+    print(dirname(dirname(dirname(abspath(__file__)))))
+    df_all = pd.read_json(dirname(dirname(dirname(abspath(__file__))))+"app/data/pred_model/model_bretagne_db.json")
     df = df_all.loc[(df_all['localite'] == Localite) & (df_all['date model'] == DateModele) & (df_all['id jour'] >= Start) & ( df_all['id jour'] <= End),:]
     return(df)
     
@@ -234,4 +235,4 @@ def __(db: Session = Depends(get_db), username:str = Depends(get_admin)):
     return db.query(models.Users_db).all()
 
 if __name__ == "__main__":
-    uvicorn.run(app, host = "127.0.0.1", port=8000)
+    uvicorn.run(app, host = "0.0.0.0", port=8000)

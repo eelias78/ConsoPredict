@@ -14,4 +14,4 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Exécuter le script lorsqu'un conteneur basé sur cette image est démarré
-CMD ["python", "test_bdd.py"]
+CMD ["python", "api.py"]
