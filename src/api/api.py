@@ -74,7 +74,7 @@ async def test_fonctionnement_api():
 
     
 """""""""""""""""""""""""""
-       BLOC : DATABASE
+  BLOC : LANCEMENT SQL A. 
 """""""""""""""""""""""""""
 
 models.Base.metadata.create_all(bind=engine)
@@ -87,7 +87,7 @@ def get_db():
         db.close()
 
 """"""""""""""""""""""""""""""""""""""""
-        BLOC : CREATION USER 
+        BLOC : CREATION UTILISATEUR 
 """""""""""""""""""""""""""""""""""""""""
 
 auth_handler = AuthHandler()
@@ -158,7 +158,7 @@ async def __ (auth_details:AuthDetails, db: Session = Depends(get_db)):
 
 
 """"""""""""""""""""""""""""""""""""""""
-    BLOC : SAISIE DE LA LOCALISATION 
+  BLOC : PARAMETRAGE DES INPUTS/OUTPUTS 
 """""""""""""""""""""""""""""""""""""""""
 
 # Chargement de la BDD météo
@@ -237,7 +237,7 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
 
 
 """""""""""""""""""""""""""""""""""""""""
-    BLOC : HISTORIQUE DES PROFILS CREES 
+   BLOC : STOCKAGE DES PROFILS & TOKENS  
 """""""""""""""""""""""""""""""""""""""""
 
 # Sécurisation du volet admin
@@ -249,7 +249,7 @@ def get_admin(credentials: HTTPBasicCredentials  = Depends(security)):
             headers={"WWW-Authenticate": "Basic"})
   return credentials.username
 
-# Espace admin pour visualiser les connexions
+# Espace admin pour visualiser les connexions utilisateurs
 @app.get("/admin", tags=['Admin'])
 def __(db: Session = Depends(get_db), username:str = Depends(get_admin)):
     return db.query(models.Users_db).all()
