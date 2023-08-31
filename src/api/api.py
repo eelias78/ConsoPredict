@@ -55,7 +55,7 @@ API développée par Label éCO2
 
 ## Fonction admin :
 * Enregistrement des utilisateurs dans une db users + affichage
-* Enregistrement des token dans une db token
+* Enregistrement des token dans la db users
 
 """
 , openapi_tags=tags_metadata)
