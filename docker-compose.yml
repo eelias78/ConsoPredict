@@ -24,6 +24,22 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./data:/data
+    networks:
+      - my-network
+
+  batch:
+    image: img_batch:latest
+    container_name: img_batch_from_compose
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: pwd
+      DB_NAME: dbconsopredict
+    volumes:
       - ./data:/app/data
     networks:
       - my-network

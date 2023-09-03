@@ -8,7 +8,11 @@ fi
 
 # Creation image_api
 cd src/api
-docker image build . --no-cache=true -t img_api:latest
+docker image build . --no-cache=false -t img_api:latest
+
+# Creation image_batch
+cd ../batch
+docker image build . --no-cache=false -t img_batch:latest
 
 # Lancer docker-compose
 docker-compose up
