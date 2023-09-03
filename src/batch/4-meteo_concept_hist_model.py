@@ -6,21 +6,21 @@ from os import listdir
 from os.path import isfile, join, dirname, abspath
 
 
+
 # Répertoire
-in_data_dir = dirname(dirname(abspath(__file__)))+'/data/processed/' # BDD processed & ML data 
-out_data_dir = dirname(dirname(abspath(__file__))) +'/data/model/' # base historique avec toutes les prédictions 
+data_dir = dirname(dirname(abspath(__file__)))+'/data/pred_model/' # ML data 
 
 # Contenu du répertoire des extractions
 def fichierBrut(in_data_dir: str):
-    files = [f for f in listdir(in_data_dir) if isfile(join(in_data_dir, f)) and "model" in f]
+    files = [f for f in listdir(data_dir) if isfile(join(data_dir, f)) and '-' in f]
     print(files)
     return(files)
     
 # Positionnement dans le répertoire des fichiers bruts et agrégation
-os.chdir(in_data_dir)
+os.chdir(data_dir)
 
 # Listing des extractions existantes + récupération du contenu de toutes les extractions dans un fichier unique
-liste_fic = fichierBrut(in_data_dir)
+liste_fic = fichierBrut(data_dir)
 
 def merge_JsonFiles(liste_fic):
     merged_contents = []
@@ -29,12 +29,10 @@ def merge_JsonFiles(liste_fic):
         with open(fichier,'r') as infile:
             merged_contents.extend(json.load(infile))
 
-    with open(out_data_dir +"model_bretagne_db.json", "w") as outfile:
+    with open(data_dir +"model_bretagne_db.json", "w") as outfile:
         json.dump(merged_contents,outfile)
 
 merge_JsonFiles(liste_fic)
 
-
-df = pd.read_json(out_data_dir +"model_bretagne_db.json")
-
+df = pd.read_json(data_dir +"model_bretagne_db.json")
 print(df)
