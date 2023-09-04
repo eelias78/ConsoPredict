@@ -12,12 +12,11 @@ COPY . .
 
 #Copie du script cron dans le conteneur
 COPY crontab /etc/cron.d/crontab
-#Copie des répertoires data dans le conteneur
-#COPY ./data/processed/ /app/data/processed/
-#COPY ./data/raw/ /app/data/raw/
+
 #Copie des scripts python dans le conteneur
 COPY 1-meteo_concept_xtract.py /app/cron_meteo_concept/1-meteo_concept_xtract.py
 COPY 2-meteo_concept_preproc.py /app/cron_meteo_concept/2-meteo_concept_preproc.py
+COPY start_batch.sh /app/cron_meteo_concept/start_batch.sh
 
 #Vue
 RUN ls -l

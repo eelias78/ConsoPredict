@@ -13,7 +13,11 @@ token='01945a30cc37c7565ae1d77010e0728a1d4863c2cd06f5e72362c9e9a4a078b4'
 url = "https://api.meteo-concept.com/api/forecast/daily/?token={token}&insee={sta_ess}"
 
 
-# Les stations météo essentielles 
+# Les stations météo essentielles
+print ('file :',__file__)
+print(abspath(__file__))
+print(dirname(abspath(__file__)))
+print(dirname(dirname(abspath(__file__))))
 fic_sta_ess = pd.read_table(dirname(dirname(abspath(__file__))) + '/data/stations.txt', sep="\t",index_col='Code Insee', dtype={"Code Insee":str})   
 dico_stat_ess=fic_sta_ess.to_dict()
 sta_ess=list(dico_stat_ess['Region'].keys())
