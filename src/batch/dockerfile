@@ -16,6 +16,8 @@ COPY crontab /etc/cron.d/crontab
 #Copie des scripts python dans le conteneur
 COPY 1-meteo_concept_xtract.py /app/cron_meteo_concept/1-meteo_concept_xtract.py
 COPY 2-meteo_concept_preproc.py /app/cron_meteo_concept/2-meteo_concept_preproc.py
+COPY 3-meteo_concept_model.py /app/cron_meteo_concept/3-meteo_concept_model.py
+COPY 4-meteo_concept_hist_model.py /app/cron_meteo_concept/4-meteo_concept_hist_model.py
 COPY start_batch.sh /app/cron_meteo_concept/start_batch.sh
 
 #Vue

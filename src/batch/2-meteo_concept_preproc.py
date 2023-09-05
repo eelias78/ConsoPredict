@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 from os.path import dirname, abspath
 
+print('Démarrage script preproc')
 
 # Création de la date du process
 now = datetime.now()
@@ -34,4 +35,4 @@ bretagne['feat_day_of_week']= bretagne.datetime.dt.day_of_week
 # Mise en forme de la date de prédiction
 bretagne['date prediction'] = bretagne['datetime'].dt.strftime("%Y-%m-%d")
 bretagne.to_json(in_data_dir +"/data/processed/processed_bretagne_"+ dt_fic+".json", orient="records")
-
+print('Fin script preproc : génération de ',in_data_dir +"/data/processed/processed_bretagne_"+ dt_fic+".json")

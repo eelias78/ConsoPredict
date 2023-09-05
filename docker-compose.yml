@@ -6,7 +6,8 @@ services:
       MYSQL_ROOT_PASSWORD: pwd
       MYSQL_DATABASE: dbconsopredict
     volumes:
-      - mysql-data:/var/lib/mysql
+      - ./src/db:/docker-entrypoint-initdb.d
+      - ./mysql-data:/var/lib/mysql
     networks:
       - my-network
   
