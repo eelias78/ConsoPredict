@@ -61,7 +61,7 @@ try:
     for index, row in df.iterrows():
         values = tuple(row)
         query = f"INSERT INTO {table_name} ({columns_name}) VALUES {values}"
-        print(query)
+        #print(query)
         cursor.execute(query)
     connection.commit()
 except Exception as e:

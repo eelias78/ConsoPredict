@@ -30,8 +30,16 @@ import sqlite3
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 
+import mysql.connector
 
-
+# Informations de connexion à la base de données
+db_config = {
+    "host": os.environ.get("DB_HOST", "db"),
+    "user": os.environ.get("DB_USER", "root"),
+    "password": os.environ.get("DB_PASSWORD", "pwd"),
+    "database": os.environ.get("DB_NAME", "dbconsopredict"),
+    "port": int(os.environ.get("DB_PORT", 3306))
+}
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -164,7 +172,16 @@ async def __ (auth_details:AuthDetails, db: Session = Depends(get_db)):
 # Chargement de la BDD météo
 def select_data(Localite, DateModele, Start, End):
     global df_all
-    df_all = pd.read_json(dirname(dirname(dirname(abspath(__file__))))+"/data/pred_model/model_bretagne_db.json")
+    connection = mysql.connector.connect(**db_config)
+    try:
+        query = f"SELECT localite, date_prediction AS 'date prediction', jour_predit AS 'jour predit', id_jour AS 'id jour', conso AS 'conso(MW)', date_model AS 'date model' FROM PREDICTIONS"
+        df_all = pd.read_sql(query, con=connection)
+        print("Contenu du dataframe chargé ", df_all.head())  # Affiche le DataFrame
+    except Exception as e:
+        print(f"Une erreur s'est produite : {str(e)}")
+    finally:
+        connection.close()
+    #df_all = pd.read_json(dirname(dirname(dirname(abspath(__file__))))+"/data/pred_model/model_bretagne_db.json")
     df = df_all.loc[(df_all['localite'] == Localite) & (df_all['date model'] == DateModele) & (df_all['id jour'] >= Start) & ( df_all['id jour'] <= End),:]
     return(df)
     
