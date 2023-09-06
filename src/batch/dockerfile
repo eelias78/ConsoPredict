@@ -20,8 +20,6 @@ COPY 3-meteo_concept_model.py /app/cron_meteo_concept/3-meteo_concept_model.py
 COPY 4-meteo_concept_hist_model.py /app/cron_meteo_concept/4-meteo_concept_hist_model.py
 COPY start_batch.sh /app/cron_meteo_concept/start_batch.sh
 
-#Vue
-RUN ls -l
 #Attribution des droits au script
 RUN chmod 0644 /etc/cron.d/crontab
 RUN /usr/bin/crontab /etc/cron.d/crontab

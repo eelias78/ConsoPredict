@@ -7,7 +7,7 @@ from os.path import isfile, join, dirname, abspath
 
 import mysql.connector
 import time
-
+from datetime import datetime
 
 # Informations de connexion à la base de données
 db_config = {
@@ -17,55 +17,62 @@ db_config = {
     "database": os.environ.get("DB_NAME", "dbconsopredict"),
     "port": int(os.environ.get("DB_PORT", 3306))
 }
+connection = mysql.connector.connect(**db_config)
 
 def test_database_connection():
     try:
-        connection = mysql.connector.connect(**db_config)
         if connection.is_connected():
             print("Connected to the database")
             
             # Exécuter une requête SELECT
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM USERS")
+            cursor.execute("SELECT COUNT(*) FROM PREDICTIONS")
             result = cursor.fetchall()
-            print("SELECT * FROM USERS returned:", result)
+            print("SELECT COUNT(*) FROM PREDICTIONS returned:", result)
             cursor.close()
-            connection.close()
         else:
             print("Connection failed")
     except Exception as e:
         print("Error:", str(e))
 
-print("test connexion base de données")
+print("SELECT en base de données avant insertion")
 test_database_connection()
 
 print('Démarrage script hist model')
 
 # Répertoire
 data_dir = dirname(dirname(abspath(__file__)))+'/data/pred_model/' # ML data 
+# Création de la date du process
+now = datetime.now()
+#dt_fic = now.strftime("%Y-%m-%d")
+dt_fic = '2023-08-20'
 
-# Contenu du répertoire des extractions
-def fichierBrut(in_data_dir: str):
-    files = [f for f in listdir(data_dir) if isfile(join(data_dir, f)) and '-' in f]
-    return(files)
-    
 # Positionnement dans le répertoire des fichiers bruts et agrégation
 os.chdir(data_dir)
 
-# Listing des extractions existantes + récupération du contenu de toutes les extractions dans un fichier unique
-liste_fic = fichierBrut(data_dir)
+df = pd.read_json(data_dir +"model_bretagne_"+ dt_fic +".json")
 
-def merge_JsonFiles(liste_fic):
-    merged_contents = []
+# Nom de la table dans la base de données MySQL
+table_name = 'PREDICTIONS'
+columns_name = 'localite, date_prediction, jour_predit, id_jour, conso, date_model'
 
-    for fichier in liste_fic : 
-        with open(fichier,'r') as infile:
-            merged_contents.extend(json.load(infile))
+try:
+    cursor = connection.cursor()
+    for index, row in df.iterrows():
+        values = tuple(row)
+        query = f"INSERT INTO {table_name} ({columns_name}) VALUES {values}"
+        print(query)
+        cursor.execute(query)
+    connection.commit()
+except Exception as e:
+    connection.rollback()
+    print(f"Une erreur s'est produite : {str(e)}")
+finally:
+    cursor.close()
 
-    with open(data_dir +"model_bretagne_db.json", "w") as outfile:
-        json.dump(merged_contents,outfile)
+print("SELECT en base de données après insertion")
+test_database_connection()
 
-merge_JsonFiles(liste_fic)
+connection.close()
 
-df = pd.read_json(data_dir +"model_bretagne_db.json")
-print('Fin script hist model : ',df.shape[0],' lignes historisées')
+print('Fin script hist model')
