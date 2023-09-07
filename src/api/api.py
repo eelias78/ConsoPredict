@@ -25,12 +25,13 @@ import json
 from os.path import dirname, abspath
 
 # Pour la création & visualisation de la database utilisateurs 
-import models
-import sqlite3
-from database import engine, SessionLocal
-from sqlalchemy.orm import Session
+#import models
+#import sqlite3
+#from database import engine, SessionLocal
+#from sqlalchemy.orm import Session
 
 import mysql.connector
+import time
 
 # Informations de connexion à la base de données
 db_config = {
@@ -85,14 +86,14 @@ async def test_fonctionnement_api():
   BLOC : LANCEMENT SQL A. 
 """""""""""""""""""""""""""
 
-models.Base.metadata.create_all(bind=engine)
+#models.Base.metadata.create_all(bind=engine)
 
-def get_db():
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
+#def get_db():
+#    try:
+#        db = SessionLocal()
+#        yield db
+#    finally:
+#        db.close()
 
 """"""""""""""""""""""""""""""""""""""""
         BLOC : CREATION UTILISATEUR 
@@ -103,32 +104,57 @@ users = []
 
 # Création de l'utilisateur 
 @app.post('/1ère étape : enregistrez-vous', status_code=201, tags=['Authentification'])
-async def __ (request: Profil, db: Session = Depends(get_db)):
+async def __ (request: Profil):
     """
     Renseignez vos informations personnelles
     """
-    user_model = models.Users_db()
-    user_model.Nom = request.Nom
-    user_model.Prenom = request.Prenom  
-    user_model.Email = request.Email
-    user_model.Alias = request.Alias
-    user_model.MotdePasse = request.MotdePasse
+    Nom = request.Nom
+    Prenom = request.Prenom  
+    Email = request.Email
+    Alias = request.Alias
+    MotdePasse = request.MotdePasse
+    
+    connection = mysql.connector.connect(**db_config)
+    try:
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute("SELECT alias FROM USERS")
+            liste_alias = [ligne[0] for ligne in cursor.fetchall()]
+        else:
+            raise HTTPException(status_code=400, detail='Erreur de connection à la base de données')
+    except Exception as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    finally:
+        cursor.close()
+        connection.close()
     
     # Vérification de l'existence de l'alias + hachage mot de passe
-    if any(x['Alias'] == request.Alias for x in users):
+    if any(x == request.Alias for x in liste_alias):
         raise HTTPException(status_code=400, detail='Le nom d\'utilisateur est déjà pris')
     else:
 
         # Database utilisateur
-        db.add(user_model)
-        db.commit()
-
-        hashed_password = auth_handler.get_password_hash(request.MotdePasse)
-        users.append({
-            'Alias': request.Alias,
-            'MotdePasse': hashed_password    
-        })
-    
+        #db.add(user_model)
+        #db.commit()
+        connection = mysql.connector.connect(**db_config)
+        try:
+            if connection.is_connected():
+                cursor = connection.cursor()
+                hashed_password = auth_handler.get_password_hash(request.MotdePasse)
+                query = "INSERT INTO USERS (nom, prenom, email, alias, motdepasse, hashed_mdp) \
+                        VALUES('"+Nom+"','"+Prenom+"','"+Email+"','"+Alias+"','"+MotdePasse+"','"+hashed_password+"')"
+                print(query)
+                cursor.execute(query)
+                connection.commit()
+            else:
+                connection.rollback()
+                raise HTTPException(status_code=400, detail='Erreur de connection à la base de données')
+        except Exception as e:
+            raise HTTPException(status_code=400, detail= str(e))
+        finally:
+            cursor.close()
+            connection.close()
+                   
         return {"Alias ": request.Alias, "MotdePasse": request.MotdePasse}
 
 
@@ -138,29 +164,48 @@ async def __ (request: Profil, db: Session = Depends(get_db)):
 
 # Login pour récupérer le token
 @app.post('/2ème étape : authentifiez-vous', tags=['Authentification'])
-async def __ (auth_details:AuthDetails, db: Session = Depends(get_db)):
+async def __ (auth_details:AuthDetails):
     """
     - Renseignez vos identfiants créés à la 1ère étape (alias et mot de passe)
     - Copiez la clé/token entre guillemets
     - Collez le token dans le volet "Prédictions Conso (MW)"
     """
 
-    user = None
-    for x in users:
-        if x['Alias'] == auth_details.Alias:
-            user = x
-            break
+    #user = None
+    #for x in users:
+    #    if x['Alias'] == auth_details.Alias:
+    #        user = x
+    #        break
 
-    if (user is None) or (not auth_handler.verify_password(auth_details.MotdePasse, user['MotdePasse'])):
+    connection = mysql.connector.connect(**db_config)
+    mdp_bdd = ""
+    try:
+        if connection.is_connected():
+            cursor = connection.cursor()
+            query = "SELECT hashed_mdp FROM USERS WHERE alias = '"+auth_details.Alias+"'"
+            print(query)
+            cursor.execute(query)
+            mdp_bdd = cursor.fetchone()[0]
+        else:
+            raise HTTPException(status_code=400, detail='Erreur de connection à la base de données')
+    except Exception as e:
+        raise HTTPException(status_code=400, detail= str(e))
+    finally:
+        cursor.close()
+        connection.close()
+
+    if mdp_bdd=="":
         raise HTTPException(status_code=401, detail='Identifiant et/ou password incorrect')
-    token = auth_handler.encode_token(user['MotdePasse'])  
+    if (not auth_handler.verify_password(auth_details.MotdePasse, mdp_bdd)):
+        raise HTTPException(status_code=401, detail='Identifiant et/ou password incorrect')
+    token = auth_handler.encode_token(mdp_bdd)  
 
     # Database pour le token
-    token_model = models.Token_db()
-    token_model.Token = token
+    #token_model = models.Token_db()
+    #token_model.Token = token
 
-    db.add(token_model)
-    db.commit()
+    #db.add(token_model)
+    #db.commit()
 
     return {'token': token }
 
@@ -182,10 +227,13 @@ def select_data(Localite, DateModele, Start, End):
     finally:
         connection.close()
     #df_all = pd.read_json(dirname(dirname(dirname(abspath(__file__))))+"/data/pred_model/model_bretagne_db.json")
+    print(df_all)
     df = df_all.loc[(df_all['localite'] == Localite) & (df_all['date model'] == DateModele) & (df_all['id jour'] >= Start) & ( df_all['id jour'] <= End),:]
     return(df)
     
-# Appel pour récupérer le df global    
+# Appel pour récupérer le df global
+# On attend 10 secondes pour être sûr que la BDD soit prête !
+time.sleep(10)    
 select_data(None,None,None,None)
 
 # Liste des régions possibles
@@ -258,20 +306,19 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
 """""""""""""""""""""""""""""""""""""""""
 
 # Sécurisation du volet admin
-security = HTTPBasic()
+#security = HTTPBasic()
 
-def get_admin(credentials: HTTPBasicCredentials  = Depends(security)):
-  if credentials.username != 'admin' or credentials.password != '4dm1N':
-     raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect id or password",
-            headers={"WWW-Authenticate": "Basic"})
-  return credentials.username
+#def get_admin(credentials: HTTPBasicCredentials  = Depends(security)):
+#  if credentials.username != 'admin' or credentials.password != '4dm1N':
+#     raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect id or password",
+#            headers={"WWW-Authenticate": "Basic"})
+#  return credentials.username
 
 # Espace admin pour visualiser les connexions utilisateurs
-@app.get("/admin", tags=['Admin'])
-def __(db: Session = Depends(get_db), username:str = Depends(get_admin)):
-    return db.query(models.Users_db).all()
-
-
+#@app.get("/admin", tags=['Admin'])
+#def __(db: Session = Depends(get_db), username:str = Depends(get_admin)):
+#    return db.query(models.Users_db).all()
 
 if __name__ == "__main__":
+
     uvicorn.run(app, host = "0.0.0.0", port=8000)
