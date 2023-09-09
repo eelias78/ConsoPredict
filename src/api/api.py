@@ -97,12 +97,12 @@ async def __ (request: Profil):
             cursor = connection.cursor()
             cursor.execute("SELECT alias FROM USERS")
             liste_alias = [ligne[0] for ligne in cursor.fetchall()]
+            cursor.close()
         else:
             raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
     except Exception as e:
         raise HTTPException(status_code=404, detail= str(e))
     finally:
-        cursor.close()
         connection.close()
     
     # Vérification de l'existence de l'alias
@@ -120,13 +120,13 @@ async def __ (request: Profil):
                 print(query)
                 cursor.execute(query)
                 connection.commit()
+                cursor.close()
             else:
                 connection.rollback()
                 raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
         except Exception as e:
             raise HTTPException(status_code=404, detail= str(e))
         finally:
-            cursor.close()
             connection.close()
                    
         return {"Alias ": request.Alias, "MotdePasse": request.MotdePasse}
@@ -153,6 +153,7 @@ async def __ (auth_details:AuthDetails):
             query = "SELECT hashed_mdp FROM USERS WHERE alias = '"+auth_details.Alias+"'"
             cursor.execute(query)
             resultat = cursor.fetchone()
+            cursor.close()
             # Si le tuple resultat n'est pas vide, alors le mdp a été trouvé dans la base de données
             if len(resultat) != 0:
                 mdp_bdd = resultat[0]
@@ -161,7 +162,6 @@ async def __ (auth_details:AuthDetails):
     except Exception as e:
         raise HTTPException(status_code=404, detail= str(e))
     finally:
-        cursor.close()
         connection.close()
     print('Mot de passe :', mdp_bdd)
     # Si le mdp n'a pas été trouvé dans la base de données (donc que l'alias n'existe pas en base), alors échec de connection 
@@ -183,10 +183,13 @@ async def __ (auth_details:AuthDetails):
 def select_all_data():
     connection = mysql.connector.connect(**db_config)
     try:
-        query = f"SELECT localite, date_prediction AS 'date prediction', jour_predit AS 'jour predit', id_jour AS 'id jour', conso AS 'conso(MW)', date_model AS 'date model' FROM PREDICTIONS"
-        df_all = pd.read_sql(query, con=connection)
+        if connection.is_connected():
+            query = f"SELECT localite, date_prediction AS 'date prediction', jour_predit AS 'jour predit', id_jour AS 'id jour', conso AS 'conso(MW)', date_model AS 'date model' FROM PREDICTIONS"
+            df_all = pd.read_sql(query, con=connection)
+        else:
+            raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
     except Exception as e:
-        print(f"Une erreur s'est produite : {str(e)}")
+        raise HTTPException(status_code=404, detail= str(e))
     finally:
         connection.close()
     return(df_all)
@@ -195,12 +198,15 @@ def select_all_data():
 def select_data(Localite, DateModele, Start, End): 
     connection = mysql.connector.connect(**db_config)
     try:
-        query = f"SELECT localite, date_prediction AS 'date prediction', jour_predit AS 'jour predit', id_jour AS 'id jour', \
-            conso AS 'conso(MW)', date_model AS 'date model' FROM PREDICTIONS \
-            WHERE localite = '{Localite}' AND date_model = '{DateModele}' AND id_jour >= {Start} AND id_jour <= {End}"
-        df_criteres = pd.read_sql(query, con=connection)
+        if connection.is_connected():
+            query = f"SELECT localite, date_prediction AS 'date prediction', jour_predit AS 'jour predit', id_jour AS 'id jour', \
+                conso AS 'conso(MW)', date_model AS 'date model' FROM PREDICTIONS \
+                WHERE localite = '{Localite}' AND date_model = '{DateModele}' AND id_jour >= {Start} AND id_jour <= {End}"
+            df_criteres = pd.read_sql(query, con=connection)
+        else:
+            raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
     except Exception as e:
-        print(f"Une erreur s'est produite : {str(e)}")
+        raise HTTPException(status_code=404, detail= str(e))
     finally:
         connection.close()
     return(df_criteres)
@@ -248,7 +254,6 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
     DateModele = params.DateModele
     Start = params.Start
     End = params.End
-
     if Region is None:
         return{"Vous n'avez pas saisi la région"}
     if Localite is None:
@@ -257,25 +262,32 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
         return{"Vous n'avez pas choisi la version du modèle"}
     elif Start is None and End is None :
         Start = 0
-        End = 13
-        headers = {'Content-Disposition': f'attachment; filename=ConsoPredict.csv'}
-        return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'),
-        media_type="text/csv", headers=headers)
+        End = 13        
     elif Start is None :
         Start = 0
-        headers = {'Content-Disposition': f'attachment; filename=ConsoPredict.csv'}
-        return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'),
-        media_type="text/csv", headers=headers)
     elif End is None :
         End = 13
-        headers = {'Content-Disposition': f'attachment; filename=ConsoPredict.csv'}
-        return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'),
-        media_type="text/csv", headers=headers)
-    else:
-        headers = {'Content-Disposition': f'attachment; filename=ConsoPredict.csv'}
-        return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'),
-        media_type="text/csv", headers=headers)
+    # Log de la requête
+    connection = mysql.connector.connect(**db_config)
+    try:
+        if connection.is_connected():
+            cursor = connection.cursor()
+            query = "INSERT INTO LOGS (date_log, localite, date_model, start_day, end_day) \
+                        VALUES(NOW(),'"+Localite+"','"+DateModele+"','"+str(Start)+"','"+str(End)+"')"
+            cursor.execute(query)
+            connection.commit()
+            cursor.close()
+        else:
+            connection.rollback()
+            raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
+    except Exception as e:
+        raise HTTPException(status_code=404, detail= str(e))
+    finally:
+        connection.close()
+    
+    # Envoi de la réponse
+    headers = {'Content-Disposition': f'attachment; filename=ConsoPredict.csv'}
+    return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'), media_type="text/csv", headers=headers)
 
 if __name__ == "__main__":
-
     uvicorn.run(app, host = "0.0.0.0", port=8000)

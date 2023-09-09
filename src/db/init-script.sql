@@ -25,3 +25,13 @@ CREATE TABLE IF NOT EXISTS PREDICTIONS (
     conso FLOAT NOT NULL,
     date_model DATE NOT NULL
 );
+
+-- Création de la tale "LOGS"
+CREATE TABLE IF NOT EXISTS LOGS (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    date_log DATE NOT NULL,
+    localite VARCHAR(255) NOT NULL,
+    date_model DATE NOT NULL,
+    start_day INT NOT NULL,
+    end_day INT NOT NULL
+);
