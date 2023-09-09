@@ -13,7 +13,7 @@ python3 /app/cron_meteo_concept/2-meteo_concept_preproc.py
 #sleep 10
 
 # Execution du script python qui va prédire la consommation
-#python3 /app/cron_meteo_concept/3-meteo_concept_model.py
+python3 /app/cron_meteo_concept/3-meteo_concept_model.py
 
 # Attente 10 secondes
 sleep 10

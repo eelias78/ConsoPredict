@@ -14,5 +14,5 @@ docker image build . --no-cache=false -t img_api:latest
 cd ../batch
 docker image build . --no-cache=false -t img_batch:latest
 
-# Lancer docker-compose
+# Lancement docker-compose
 docker-compose up

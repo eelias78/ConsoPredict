@@ -24,12 +24,7 @@ import os
 import json
 from os.path import dirname, abspath
 
-# Pour la création & visualisation de la database utilisateurs 
-#import models
-#import sqlite3
-#from database import engine, SessionLocal
-#from sqlalchemy.orm import Session
-
+# Pour la base de données
 import mysql.connector
 import time
 
@@ -41,7 +36,6 @@ db_config = {
     "database": os.environ.get("DB_NAME", "dbconsopredict"),
     "port": int(os.environ.get("DB_PORT", 3306))
 }
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -62,10 +56,6 @@ API développée par Label éCO2
 * Saisir une localité et une période de prédiction
 * Générer un fichier csv contenant la prédiction de consommation électrique (MW)
 
-## Fonction admin :
-* Enregistrement des utilisateurs dans une db users + affichage
-* Enregistrement des token dans la db users
-
 """
 , openapi_tags=tags_metadata)
 
@@ -80,21 +70,7 @@ API développée par Label éCO2
 @app.get('/', tags=['Endpoint'])
 async def test_fonctionnement_api():
     return{"Bonjour et bienvenue sur l'API ConsoPredict"}
-
     
-"""""""""""""""""""""""""""
-  BLOC : LANCEMENT SQL A. 
-"""""""""""""""""""""""""""
-
-#models.Base.metadata.create_all(bind=engine)
-
-#def get_db():
-#    try:
-#        db = SessionLocal()
-#        yield db
-#    finally:
-#        db.close()
-
 """"""""""""""""""""""""""""""""""""""""
         BLOC : CREATION UTILISATEUR 
 """""""""""""""""""""""""""""""""""""""""
@@ -114,6 +90,7 @@ async def __ (request: Profil):
     Alias = request.Alias
     MotdePasse = request.MotdePasse
     
+    # Récupération de la liste des alias existants
     connection = mysql.connector.connect(**db_config)
     try:
         if connection.is_connected():
@@ -121,21 +98,18 @@ async def __ (request: Profil):
             cursor.execute("SELECT alias FROM USERS")
             liste_alias = [ligne[0] for ligne in cursor.fetchall()]
         else:
-            raise HTTPException(status_code=400, detail='Erreur de connection à la base de données')
+            raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
     except Exception as e:
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=404, detail= str(e))
     finally:
         cursor.close()
         connection.close()
     
-    # Vérification de l'existence de l'alias + hachage mot de passe
+    # Vérification de l'existence de l'alias
     if any(x == request.Alias for x in liste_alias):
         raise HTTPException(status_code=400, detail='Le nom d\'utilisateur est déjà pris')
     else:
-
-        # Database utilisateur
-        #db.add(user_model)
-        #db.commit()
+        # Hachage mot de passe et insertion en base de données du user
         connection = mysql.connector.connect(**db_config)
         try:
             if connection.is_connected():
@@ -148,9 +122,9 @@ async def __ (request: Profil):
                 connection.commit()
             else:
                 connection.rollback()
-                raise HTTPException(status_code=400, detail='Erreur de connection à la base de données')
+                raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
         except Exception as e:
-            raise HTTPException(status_code=400, detail= str(e))
+            raise HTTPException(status_code=404, detail= str(e))
         finally:
             cursor.close()
             connection.close()
@@ -170,42 +144,33 @@ async def __ (auth_details:AuthDetails):
     - Copiez la clé/token entre guillemets
     - Collez le token dans le volet "Prédictions Conso (MW)"
     """
-
-    #user = None
-    #for x in users:
-    #    if x['Alias'] == auth_details.Alias:
-    #        user = x
-    #        break
-
+    # Récupération du mot de passe hashé de cet alias dans la base de données
     connection = mysql.connector.connect(**db_config)
     mdp_bdd = ""
     try:
         if connection.is_connected():
             cursor = connection.cursor()
             query = "SELECT hashed_mdp FROM USERS WHERE alias = '"+auth_details.Alias+"'"
-            print(query)
             cursor.execute(query)
-            mdp_bdd = cursor.fetchone()[0]
+            resultat = cursor.fetchone()
+            # Si le tuple resultat n'est pas vide, alors le mdp a été trouvé dans la base de données
+            if len(resultat) != 0:
+                mdp_bdd = resultat[0]
         else:
-            raise HTTPException(status_code=400, detail='Erreur de connection à la base de données')
+            raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
     except Exception as e:
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=404, detail= str(e))
     finally:
         cursor.close()
         connection.close()
-
+    print('Mot de passe :', mdp_bdd)
+    # Si le mdp n'a pas été trouvé dans la base de données (donc que l'alias n'existe pas en base), alors échec de connection 
     if mdp_bdd=="":
-        raise HTTPException(status_code=401, detail='Identifiant et/ou password incorrect')
+        raise HTTPException(status_code=401, detail='Alias inconnu')
+    # Si le mdp a été trouvé mais que le mot de passe entré n'est pas correct, alors échec de connection
     if (not auth_handler.verify_password(auth_details.MotdePasse, mdp_bdd)):
-        raise HTTPException(status_code=401, detail='Identifiant et/ou password incorrect')
+        raise HTTPException(status_code=401, detail='Mot de passe incorrect')
     token = auth_handler.encode_token(mdp_bdd)  
-
-    # Database pour le token
-    #token_model = models.Token_db()
-    #token_model.Token = token
-
-    #db.add(token_model)
-    #db.commit()
 
     return {'token': token }
 
@@ -214,27 +179,38 @@ async def __ (auth_details:AuthDetails):
   BLOC : PARAMETRAGE DES INPUTS/OUTPUTS 
 """""""""""""""""""""""""""""""""""""""""
 
-# Chargement de la BDD météo
-def select_data(Localite, DateModele, Start, End):
-    global df_all
+# Chargement de l'ensemble des prédictions
+def select_all_data():
     connection = mysql.connector.connect(**db_config)
     try:
         query = f"SELECT localite, date_prediction AS 'date prediction', jour_predit AS 'jour predit', id_jour AS 'id jour', conso AS 'conso(MW)', date_model AS 'date model' FROM PREDICTIONS"
         df_all = pd.read_sql(query, con=connection)
-        print("Contenu du dataframe chargé ", df_all.head())  # Affiche le DataFrame
     except Exception as e:
         print(f"Une erreur s'est produite : {str(e)}")
     finally:
         connection.close()
-    #df_all = pd.read_json(dirname(dirname(dirname(abspath(__file__))))+"/data/pred_model/model_bretagne_db.json")
-    print(df_all)
-    df = df_all.loc[(df_all['localite'] == Localite) & (df_all['date model'] == DateModele) & (df_all['id jour'] >= Start) & ( df_all['id jour'] <= End),:]
-    return(df)
-    
+    return(df_all)
+
+# Chargement des prédictions filtrées sur les critères passés en paramètre
+def select_data(Localite, DateModele, Start, End): 
+    connection = mysql.connector.connect(**db_config)
+    try:
+        query = f"SELECT localite, date_prediction AS 'date prediction', jour_predit AS 'jour predit', id_jour AS 'id jour', \
+            conso AS 'conso(MW)', date_model AS 'date model' FROM PREDICTIONS \
+            WHERE localite = '{Localite}' AND date_model = '{DateModele}' AND id_jour >= {Start} AND id_jour <= {End}"
+        df_criteres = pd.read_sql(query, con=connection)
+    except Exception as e:
+        print(f"Une erreur s'est produite : {str(e)}")
+    finally:
+        connection.close()
+    return(df_criteres)
+ 
+
+############## On attend 10 secondes pour être sûr que la BDD soit prête !
+time.sleep(10)
+##############    
 # Appel pour récupérer le df global
-# On attend 10 secondes pour être sûr que la BDD soit prête !
-time.sleep(10)    
-select_data(None,None,None,None)
+df_all = select_all_data()
 
 # Liste des régions possibles
 liste_station = ['Bretagne']
@@ -278,7 +254,7 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
     if Localite is None:
         return{"Vous n'avez pas saisi la localite"}
     if DateModele is None :
-        return{"Vous n'avez pas choisir la version du modèle"}
+        return{"Vous n'avez pas choisi la version du modèle"}
     elif Start is None and End is None :
         Start = 0
         End = 13
@@ -296,28 +272,9 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
         return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'),
         media_type="text/csv", headers=headers)
     else:
-       headers = {'Content-Disposition': f'attachment; filename=ConsoPredict.csv'}
-       return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'),
+        headers = {'Content-Disposition': f'attachment; filename=ConsoPredict.csv'}
+        return Response(select_data(Localite,DateModele,Start,End).to_csv(index=False, sep=';'),
         media_type="text/csv", headers=headers)
-
-
-"""""""""""""""""""""""""""""""""""""""""
-   BLOC : STOCKAGE DES PROFILS & TOKENS  
-"""""""""""""""""""""""""""""""""""""""""
-
-# Sécurisation du volet admin
-#security = HTTPBasic()
-
-#def get_admin(credentials: HTTPBasicCredentials  = Depends(security)):
-#  if credentials.username != 'admin' or credentials.password != '4dm1N':
-#     raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect id or password",
-#            headers={"WWW-Authenticate": "Basic"})
-#  return credentials.username
-
-# Espace admin pour visualiser les connexions utilisateurs
-#@app.get("/admin", tags=['Admin'])
-#def __(db: Session = Depends(get_db), username:str = Depends(get_admin)):
-#    return db.query(models.Users_db).all()
 
 if __name__ == "__main__":
 

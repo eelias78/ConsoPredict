@@ -1,3 +1,3 @@
 # START CRON JOB
-*/1 * * * * /app/cron_meteo_concept/start_batch.sh > /proc/1/fd/1 2>/proc/1/fd/2
+*/5 * * * * /app/cron_meteo_concept/start_batch.sh > /proc/1/fd/1 2>/proc/1/fd/2
 # END CRON JOB
