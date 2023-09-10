@@ -1,9 +1,13 @@
 name: Control Push
 on: push
+env:
+  dockerhub_id: eelias78
+  dockerhub_repository: img_api
+  
 jobs:
   qa:
     name: Check tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout on master
         uses: actions/checkout@v3
@@ -20,3 +24,21 @@ jobs:
       - name: Run tests
         run: |
           pytest
+
+  build-push-api:
+    name: Build and push image api and batch
+    needs: qa
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: | 
+        cd src/api
+        docker image build . --no-cache=false -t img_api:latest
+        docker tag img_api:latest eelias78/img_api:latest
+        cd ../batch
+        docker image build . --no-cache=false -t img_batch:latest
+        docker tag img_batch:latest eelias78/img_batch:latest
+        docker login -u eelias78 -p Phil@ma73
+        docker push eelias78/img_api:latest
+        docker push eelias78/img_batch:latest

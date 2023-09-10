@@ -12,7 +12,7 @@ services:
       - my-network
   
   api:
-    image: img_api:latest
+    image: eelias78/img_api:latest
     container_name: img_api_from_compose
     depends_on:
       - db
@@ -30,7 +30,7 @@ services:
       - my-network
 
   batch:
-    image: img_batch:latest
+    image: eelias78/img_batch:latest
     container_name: img_batch_from_compose
     depends_on:
       - db
