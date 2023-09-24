@@ -4,3 +4,5 @@ requests== 2.22.0
 fastapi==0.63.0
 uvicorn==0.13.3
 mysql-connector-python==8.1.0
+keras-tcn==3.5.0
+tensorflow==2.13.0
