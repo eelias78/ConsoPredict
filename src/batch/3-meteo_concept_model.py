@@ -4,11 +4,12 @@ import json
 import keras
 import numpy as np
 import pandas as pd
+import sklearn
 from datetime import datetime
 from os.path import dirname, abspath
-from tcn import TCN, tcn_full_summary
-from tensorflow.keras.models import model_from_json
-
+from tcn import TCN
+from tcn import tcn_full_summary
+from keras.models import model_from_json
 
 # Création de la date du process
 now = datetime.now()
