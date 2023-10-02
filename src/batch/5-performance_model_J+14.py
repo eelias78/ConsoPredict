@@ -7,7 +7,7 @@ from datetime import datetime
 from pandas import json_normalize
 from scipy.spatial import distance
 from os.path import dirname, abspath
-from datetime import timedelta, date
+from datetime import timedelta
 from sklearn.metrics import mean_absolute_error as MAE
 
 
@@ -16,7 +16,7 @@ from sklearn.metrics import mean_absolute_error as MAE
 data_dir = dirname(dirname(abspath(__file__))) + "/data/pred_model/"
 
 # Création de la date du process
-now = date(2023,9,17)#datetime.now()
+now = datetime.now()
 jour_proc = now.strftime("%Y-%m-%d")
 
 # Paramètres de connexion à l'API Odré
@@ -71,7 +71,7 @@ df_metrics['date_perf_calcul'] = jour_proc
 df_metrics['moyenne_pred'] = moyenne_pred
 df_metrics['moyenne_reel'] = moyenne_reel
 df_metrics['ecart-type_pred'] = ecart_type_pred
-df_metrics['ecart-type_reel'] = ecart_type_pred
+df_metrics['ecart-type_reel'] = ecart_type_reel
 df_metrics['MAE']= MAE
 
 # Calcul de l'indicateur distance euclidienne
@@ -80,7 +80,6 @@ conso_reel = tuple(comp['conso_tps_reel(MW)'])
 conso_pred = tuple(comp['conso_moy_pred(MW)'])
 distance_euclidean= distance.euclidean(conso_reel,conso_pred)
 df_metrics['pct_dist_euclid']=100*(distance_euclidean/norm)
-#df_metrics.to_json(data_dir + 'model_metrics_bretagne_db.json', orient="records")
 resultat_metrics=df_metrics.to_dict('records')
 print(df_metrics)
 
@@ -109,5 +108,3 @@ def metrics_json(new_data, file_name= data_dir +'model_metrics_bretagne_db.json'
         print(pd.read_json(file_name))
 
 metrics_json(new_data=resultat_metrics)
-
-
