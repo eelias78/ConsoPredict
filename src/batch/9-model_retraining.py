@@ -11,14 +11,16 @@ from datetime import timedelta, date
 from tcn import TCN, tcn_full_summary
 
 
-# Répertoire
+# Répertoires
 data_dir = dirname(dirname(abspath(__file__)))+'/data/raw_4_dev_model/' 
+model_dir = dirname(dirname(abspath(__file__)))+'/model/' 
 
 # Création de la date du process
 now = datetime.now()
 
 # Paramètres de connexion aux API Odré opendatasoft
 region='Bretagne'
+jour_proc = now.strftime("%Y-%m-%d")
 date_deb = (now - timedelta(days=365))
 jour_deb = date(date_deb.year, 1, 1)
 jour_fin = (now - timedelta(days=180)).strftime("%Y-%m-%d")
@@ -110,7 +112,7 @@ for j,k in enumerate(ind_val):
     y_val[j,:,:]=y.iloc[k:k+output_timesteps,:].to_numpy()
 
 print(X_train.shape,X_test.shape,X_val.shape)
-print(y_train.shape,y_test.shape,y_val.shape)
+print(y_train.shape,y_test.shape,y_val.shape)p
 
 # Modèle
 inputs=keras.layers.Input(shape=(timesteps, input_dim), name="Input")
@@ -118,7 +120,7 @@ layer_tcn=TCN(nb_filters=32,kernel_size=6, nb_stacks=1, return_sequences=True, d
 layer_Dense=keras.layers.Dense(output_dim, name='Dense')
 x=layer_tcn(inputs)
 outputs=layer_Dense(x)
-model = keras.models.Model(inputs = inputs, outputs = outputs, name='Model_0_Bret')
+model = keras.models.Model(inputs = inputs, outputs = outputs, name='Model_Bret_'+ jour_proc)
 
 model.summary()
 
@@ -135,10 +137,11 @@ val_loss = training_history.history['val_loss']
 
 y_pred=model.predict(X_test)
 
-print(y_pred[:,:,0].shape)
-df = pd.DataFrame(y_pred[:,:,0])
-df.to_csv('pred.csv', sep=';')
-print(df)
-
-
+# Enregistrement du modèle
+model.save(model_dir + 'model_bretagne' + jour_proc + '.keras')
+model_as_json = model.to_json()
+with open(model_dir + 'model_' + jour_proc + '.json', "w") as json_file:
+    json_file.write(model_as_json)
+# Enregistrement poids 
+model.save_weights(model_dir + 'weights_' + jour_proc + '.h5')
 
