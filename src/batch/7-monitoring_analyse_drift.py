@@ -7,7 +7,7 @@ from datetime import datetime
 from pandas import json_normalize
 from scipy.spatial import distance
 from os.path import dirname, abspath
-from datetime import timedelta, date
+from datetime import timedelta
 from sklearn.metrics import mean_absolute_error as MAE
 
 
@@ -24,7 +24,7 @@ df_obs['date_model']= pd.to_datetime(df_obs['date_model']).dt.date
 region='Bretagne'
 now = datetime.now()
 jour_proc = now.strftime("%Y-%m-%d")
-jour_deb = max(np.unique(df_obs['date_model']))
+jour_deb = (now - timedelta(days=40)).strftime("%Y-%m-%d")
 
 # Base de modélisation
 df_mod = pd.read_csv(data_dir_4_dev + 'Conso_Bretagne.csv', sep = ';', index_col= 0)
@@ -67,9 +67,9 @@ df_metrics['ecart-type_tps_reel'] = ecart_type_tps_reel
 df_metrics['ecart-type_per_mod'] = ecart_type_per_mod
 df_metrics['moyenne_tps_reel'] = moyenne_tps_reel
 df_metrics['moyenne_per_mod'] = moyenne_per_mod
-#df_metrics.to_json(data_dir_pred+'model_drift_bretagne_db.json', orient='records')
 resultat_metrics=df_metrics.to_dict('records')
 print(df_metrics)
+
 
 def metrics_json(new_data, file_name= data_dir_pred +'model_drift_bretagne_db.json'):
     with open(file_name, 'r') as infile:
@@ -93,7 +93,3 @@ def metrics_json(new_data, file_name= data_dir_pred +'model_drift_bretagne_db.js
         print(pd.read_json(file_name))
 
 metrics_json(new_data=resultat_metrics)
-
-
-
-
