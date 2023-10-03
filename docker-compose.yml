@@ -42,6 +42,7 @@ services:
       DB_NAME: dbconsopredict
     volumes:
       - ./data:/app/data
+      - ./model:/app/model
     networks:
       - my-network
 

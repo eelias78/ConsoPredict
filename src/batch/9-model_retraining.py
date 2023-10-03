@@ -112,7 +112,7 @@ for j,k in enumerate(ind_val):
     y_val[j,:,:]=y.iloc[k:k+output_timesteps,:].to_numpy()
 
 print(X_train.shape,X_test.shape,X_val.shape)
-print(y_train.shape,y_test.shape,y_val.shape)p
+print(y_train.shape,y_test.shape,y_val.shape)
 
 # Modèle
 inputs=keras.layers.Input(shape=(timesteps, input_dim), name="Input")

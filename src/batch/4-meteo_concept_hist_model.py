@@ -43,10 +43,7 @@ test_database_connection()
 data_dir = dirname(dirname(abspath(__file__)))+'/data/pred_model/' # ML data 
 # Création de la date du process
 now = datetime.now()
-#dt_fic = now.strftime("%Y-%m-%d")
-############################ TEMPORAIRE DU FAIT DU PB SUR LE SCIPT 3
-dt_fic = '2023-08-20'
-###########################
+dt_fic = now.strftime("%Y-%m-%d")
 
 # Positionnement dans le répertoire des fichiers bruts et agrégation
 os.chdir(data_dir)

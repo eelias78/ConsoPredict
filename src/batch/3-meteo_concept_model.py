@@ -55,7 +55,7 @@ def get_model():
 model = get_model()
 
 # Chargement du modèle développé sur la Bretagne
-loaded_json = open(in_model + '/model.json', 'r').read()
+loaded_json = open(in_model + 'model.json', 'r').read()
 reloaded_model = model_from_json(loaded_json, custom_objects={'TCN': TCN})
 tcn_full_summary(model, expand_residual_blocks=False)
 
