@@ -36,10 +36,10 @@ jobs:
     - name: Build the Docker image
       run: | 
         cd src/api
-        docker image build . --no-cache=true -t img_api:latest
+        docker image build . --no-cache=false -t img_api:latest
         docker tag img_api:latest eelias78/img_api:latest
         cd ../batch
-        docker image build . --no-cache=true -t img_batch:latest
+        docker image build . --no-cache=false -t img_batch:latest
         docker tag img_batch:latest eelias78/img_batch:latest
         docker login -u eelias78 -p Phil@ma73
         docker push eelias78/img_api:latest
