@@ -147,10 +147,11 @@ async def __ (auth_details:AuthDetails):
     # Récupération du mot de passe hashé de cet alias dans la base de données
     connection = mysql.connector.connect(**db_config)
     mdp_bdd = ""
+    alias = auth_details.Alias
     try:
         if connection.is_connected():
             cursor = connection.cursor()
-            query = "SELECT hashed_mdp FROM USERS WHERE alias = '"+auth_details.Alias+"'"
+            query = "SELECT hashed_mdp FROM USERS WHERE alias = '"+alias+"'"
             cursor.execute(query)
             resultat = cursor.fetchone()
             cursor.close()
@@ -170,8 +171,24 @@ async def __ (auth_details:AuthDetails):
     # Si le mdp a été trouvé mais que le mot de passe entré n'est pas correct, alors échec de connection
     if (not auth_handler.verify_password(auth_details.MotdePasse, mdp_bdd)):
         raise HTTPException(status_code=401, detail='Mot de passe incorrect')
-    token = auth_handler.encode_token(mdp_bdd)  
-
+    token = auth_handler.encode_token(mdp_bdd)
+    # Enregistrement en BDD du couple alias / token  
+    connection = mysql.connector.connect(**db_config)
+    try:
+        if connection.is_connected():
+            cursor = connection.cursor()
+            query = "INSERT INTO ALIAS_TOKEN (alias, token) VALUES('"+alias+"','"+token+"')"
+            print(query)
+            cursor.execute(query)
+            connection.commit()
+            cursor.close()
+        else:
+            connection.rollback()
+            raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
+    except Exception as e:
+        raise HTTPException(status_code=404, detail= str(e))
+    finally:
+        connection.close()
     return {'token': token }
 
 
@@ -268,12 +285,32 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
     elif End is None :
         End = 13
     # Log de la requête
+    # On recherche d'abord l'alias correspondant au token
     connection = mysql.connector.connect(**db_config)
     try:
         if connection.is_connected():
             cursor = connection.cursor()
-            query = "INSERT INTO LOGS (date_log, localite, date_model, start_day, end_day) \
-                        VALUES(NOW(),'"+Localite+"','"+DateModele+"','"+str(Start)+"','"+str(End)+"')"
+            query = "SELECT alias FROM USERS WHERE hashed_mdp= '"+Identifiant+"'"
+            print('recherche alias :',query)
+            cursor.execute(query)
+            resultat = cursor.fetchone()
+            cursor.close()
+            # Si le tuple resultat n'est pas vide, alors le mdp a été trouvé dans la base de données
+            if len(resultat) != 0:
+                alias = resultat[0]
+        else:
+            raise HTTPException(status_code=404, detail='Erreur de connection à la base de données')
+    except Exception as e:
+        raise HTTPException(status_code=404, detail= str(e))
+    finally:
+        connection.close()
+    # Puis on enregistre le log
+    connection = mysql.connector.connect(**db_config)
+    try:
+        if connection.is_connected():
+            cursor = connection.cursor()
+            query = "INSERT INTO LOGS (date_log, alias, localite, date_model, start_day, end_day) \
+                        VALUES(NOW(),'"+Localite+"','"+alias+"','"+DateModele+"','"+str(Start)+"','"+str(End)+"')"
             cursor.execute(query)
             connection.commit()
             cursor.close()
