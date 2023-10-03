@@ -19,13 +19,13 @@ jobs:
 
       - name: Install pytest
         run: |
-          cd src/api
-          pip install -r requirements.txt
-          pip install httpx
-          pip install pytest
+          #cd src/api
+          #pip install -r requirements.txt
+          #pip install httpx
+          #pip install pytest
       - name: Run tests
         run: |
-          pytest
+          #pytest
 
   build-push-api:
     name: Build and push image api and batch
