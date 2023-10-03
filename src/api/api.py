@@ -310,7 +310,7 @@ async def __(params:parametres=Depends(),Identifiant: str = Depends(auth_handler
         if connection.is_connected():
             cursor = connection.cursor()
             query = "INSERT INTO LOGS (date_log, alias, localite, date_model, start_day, end_day) \
-                        VALUES(NOW(),'"+Localite+"','"+alias+"','"+DateModele+"','"+str(Start)+"','"+str(End)+"')"
+                        VALUES(NOW(),'"+alias+"','"+Localite+"','"+DateModele+"','"+str(Start)+"','"+str(End)+"')"
             cursor.execute(query)
             connection.commit()
             cursor.close()
