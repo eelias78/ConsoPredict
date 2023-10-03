@@ -2,6 +2,8 @@ from fastapi.testclient import TestClient
 import json
 
 from .api import app
+import schemas
+import authentication
 
 client = TestClient(app)
 
