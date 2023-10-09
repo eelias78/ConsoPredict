@@ -11,9 +11,6 @@ from datetime import datetime
 
 print('Démarrage script 6')
 
-# Répertoire
-data_dir = dirname(dirname(abspath(__file__)))+'/data/pred_model/' # ML data 
-
 # Informations de connexion à la base de données
 db_config = {
     "host": os.environ.get("DB_HOST", "db"),
@@ -31,9 +28,9 @@ def test_database_connection():
         if connection.is_connected():
             print("Connected to the database")
             cursor = connection.cursor()
-            cursor.execute("SELECT COUNT(*) FROM PREDICTIONS")
+            cursor.execute("SELECT COUNT(*) FROM OBSERVATIONS")
             result = cursor.fetchall()[0]
-            print("Nb lignes dans table PREDICTIONS :", result)
+            print("Nb lignes dans table OBSERVATIONS :", result)
             cursor.close()
         else:
             print("Connection failed")
@@ -49,14 +46,14 @@ data_dir = dirname(dirname(abspath(__file__)))+'/data/pred_model/' # ML data
 now = datetime.now()
 dt_fic = now.strftime("%Y-%m-%d")
 
-# Positionnement dans le répertoire des fichiers bruts et agrégation
+# Positionnement dans le répertoire des fichiers bruts
 os.chdir(data_dir)
 
-df = pd.read_json(data_dir +"model_bretagne_"+ dt_fic +".json")
+df = pd.read_json(data_dir +"obs_tps_reel_bretagne_"+ dt_fic +".json")
 
 # Nom de la table dans la base de données MySQL
-table_name = 'PREDICTIONS'
-columns_name = 'localite, date_prediction, jour_predit, id_jour, conso, date_model'
+table_name = 'OBSERVATIONS'
+columns_name = 'code_insee_region, libelle_region, heure, date_heure, consommation'
 
 # Insertion des données dans la table PREDICTIONS (ligne par ligne)
 try:

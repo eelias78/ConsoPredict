@@ -46,7 +46,7 @@ data_dir = dirname(dirname(abspath(__file__)))+'/data/pred_model/' # ML data
 now = datetime.now()
 dt_fic = now.strftime("%Y-%m-%d")
 
-# Positionnement dans le répertoire des fichiers bruts et agrégation
+# Positionnement dans le répertoire des fichiers bruts
 os.chdir(data_dir)
 
 df = pd.read_json(data_dir +"model_bretagne_"+ dt_fic +".json")
