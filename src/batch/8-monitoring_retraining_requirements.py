@@ -4,7 +4,7 @@ import subprocess
 import pandas as pd
 from os.path import dirname, abspath
 
-
+print('Démarrage script 8')
 
 # Répertoire
 data_dir = dirname(dirname(abspath(__file__))) + "/data/pred_model/"
@@ -21,7 +21,14 @@ print(model_perf.iloc[:,2:])
 print(model_drift.iloc[:,2:])
 
 # Conditions pour ré-entrainement
-if model_perf['pct_dist_euclid'].mean().round() > 40 or model_drift['pct_dist_euclid'].mean() > 30:
+perf = model_perf['pct_dist_euclid'].mean().round()
+drift = model_drift['pct_dist_euclid'].mean()
+print('Metric Perf = ', perf)
+print('Metric Drift = ',drift)
+if perf > 40 or drift > 30:
+    print('=> réentrainement nécessaire')
     subprocess.call(['python3', '9-model_retraining.py'])
 else :
-    print('Au vu de ces résultats aucun ré-entraînement n\'est nécessaire')
+    print('=> pas de réentraînement nécessaire')
+
+print ('fin script 8')

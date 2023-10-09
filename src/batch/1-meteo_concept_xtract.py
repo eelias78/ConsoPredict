@@ -12,7 +12,7 @@ token='01945a30cc37c7565ae1d77010e0728a1d4863c2cd06f5e72362c9e9a4a078b4'
 
 url = "https://api.meteo-concept.com/api/forecast/daily/?token={token}&insee={sta_ess}"
 
-print('Démarrage script extraction')
+print('Démarrage script 1')
 
 # Les stations météo essentielles
 fic_sta_ess = pd.read_table(dirname(dirname(abspath(__file__))) + '/data/stations.txt', sep="\t",index_col='Code Insee', dtype={"Code Insee":str})   
@@ -45,4 +45,4 @@ dt_fic = now.strftime("%Y-%m-%d")
 # Stockage des prévisions dans un fichier json
 file_path= dirname((dirname(abspath(__file__)))) + "/data/raw_4_prediction/meteo_concept_dt_val_"
 df.to_json(file_path + dt_fic + '.json',orient="records")
-print('Fin script extraction : ',pd.read_json(file_path + dt_fic + '.json').shape[0],' lignes générées dans ', file_path + dt_fic)
+print('Fin script 1 : ',pd.read_json(file_path + dt_fic + '.json').shape[0],' lignes générées dans ', file_path + dt_fic)

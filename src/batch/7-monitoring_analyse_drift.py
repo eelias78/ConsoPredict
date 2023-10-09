@@ -10,7 +10,7 @@ from os.path import dirname, abspath
 from datetime import timedelta
 from sklearn.metrics import mean_absolute_error as MAE
 
-
+print('Démarrage script 7')
 
 # Répertoire
 data_dir_pred = dirname(dirname(abspath(__file__))) + "/data/pred_model/"
@@ -93,3 +93,5 @@ def metrics_json(new_data, file_name= data_dir_pred +'model_drift_bretagne_db.js
         print(pd.read_json(file_name))
 
 metrics_json(new_data=resultat_metrics)
+
+print('Fin script 7 : mise à jour de ', data_dir_pred +'model_drift_bretagne_db.json')

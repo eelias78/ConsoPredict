@@ -11,6 +11,8 @@ from tcn import TCN
 from tcn import tcn_full_summary
 from keras.models import model_from_json
 
+print('Démarrage script 3')
+
 # Création de la date du process
 now = datetime.now()
 dt_fic = now.strftime("%Y-%m-%d")
@@ -79,4 +81,4 @@ df = df[['localite','date prediction','jour predit','id jour','conso(MW)', 'date
 
 df.to_json(out_data_dir +"model_bretagne_"+ dt_fic +".json", orient="records")
 
-print(df)
+print('Fin script 3 : génération de ', out_data_dir +"model_bretagne_"+ dt_fic +".json") 

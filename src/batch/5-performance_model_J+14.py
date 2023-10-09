@@ -10,7 +10,7 @@ from os.path import dirname, abspath
 from datetime import timedelta
 from sklearn.metrics import mean_absolute_error as MAE
 
-
+print('Démarrage script 5')
 
 # Répertoire
 data_dir = dirname(dirname(abspath(__file__))) + "/data/pred_model/"
@@ -40,7 +40,7 @@ reel['date_model'] = jour_deb
 reel.drop(['heure','date_heure','consommation'], axis=1, inplace=True)
 reel.drop(index=reel.index[-1],axis=0,inplace=True)
 reel.to_json(data_dir + 'obs_tps_reel_bretagne_'+ jour_proc + '.json', orient="records")
-print(reel)
+#print(reel)
 
 # Récupération des prédictions et calcul de la conso moyenne sur la région
 predit=pd.read_json(data_dir + 'model_bretagne_db.json')
@@ -48,12 +48,12 @@ predit['conso_moy_pred(MW)']= predit.groupby(['date prediction'])['conso(MW)'].t
 predit= predit.groupby('date prediction').first().reset_index()
 predit['date prediction'] = pd.to_datetime(predit['date prediction']).dt.date
 predit.drop(['localite','jour predit','id jour','conso(MW)'],axis=1,inplace=True)
-print(predit)
+#print(predit)
 
 # Réunion des prédictions et des observations
 comp=reel.merge(predit.loc[:, predit.columns != 'date model'], left_on ='date', right_on = 'date prediction', how = 'left')
 comp = comp.rename(columns = {"date prediction": "date_prediction"}) 
-print(comp)
+#print(comp)
 
 # Calcul de l'indicateur MAE
 MAE=MAE(y_true=comp['conso_tps_reel(MW)'], y_pred=comp['conso_moy_pred(MW)'])
@@ -108,3 +108,5 @@ def metrics_json(new_data, file_name= data_dir +'model_metrics_bretagne_db.json'
         print(pd.read_json(file_name))
 
 metrics_json(new_data=resultat_metrics)
+
+print('Fin script 5 : génération de', data_dir + 'obs_tps_reel_bretagne_'+ jour_proc + '.json', ' et mise à jour de ', data_dir +"model_metrics_bretagne_db.json")

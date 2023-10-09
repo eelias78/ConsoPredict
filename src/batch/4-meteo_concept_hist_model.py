@@ -9,6 +9,8 @@ import mysql.connector
 import time
 from datetime import datetime
 
+print('Démarrage script 4')
+
 # Informations de connexion à la base de données
 db_config = {
     "host": os.environ.get("DB_HOST", "db"),
@@ -35,7 +37,6 @@ def test_database_connection():
     except Exception as e:
         print("Error:", str(e))
 
-print('Démarrage script hist model')
 # Compte du nb de lignes avant insertion
 test_database_connection()
 
@@ -71,4 +72,26 @@ finally:
 # Compte du nb de lignes après insertion
 test_database_connection()
 connection.close()
-print('Fin script hist model')
+
+# Contenu du répertoire des extractions
+def fichierBrut(in_data_dir: str):
+    files = [f for f in listdir(data_dir) if isfile(join(data_dir, f)) and '-' in f]
+    print(files)
+    return(files)
+# Positionnement dans le répertoire des fichiers bruts et agrégation
+os.chdir(data_dir)
+
+# Listing des extractions existantes + récupération du contenu de toutes les extractions dans un fichier unique
+liste_fic = fichierBrut(data_dir)
+
+def merge_JsonFiles(liste_fic):
+    merged_contents = []
+    for fichier in liste_fic : 
+        with open(fichier,'r') as infile:
+            merged_contents.extend(json.load(infile))
+    with open(data_dir +"model_bretagne_db.json", "w") as outfile:
+        json.dump(merged_contents,outfile)
+
+merge_JsonFiles(liste_fic)
+
+print('Fin script 4 : mise à jour de ', data_dir +"model_bretagne_db.json", ' et historisation en base de données')

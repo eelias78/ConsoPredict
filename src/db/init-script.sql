@@ -42,3 +42,14 @@ CREATE TABLE IF NOT EXISTS ALIAS_TOKEN (
     alias VARCHAR(255) NOT NULL,
     token VARCHAR(1000) NOT NULL
 );
+
+-- Création de la table OBSERVATIONS
+CREATE TABLE IF NOT EXISTS OBSERVATIONS (
+    obs_id INT AUTO_INCREMENT PRIMARY KEY,
+    code_insee_region VARCHAR(255) NOT NULL,
+    libelle_region VARCHAR(255) NOT NULL,
+    heure VARCHAR(255) NOT NULL,
+    date_heure VARCHAR(255) NOT NULL,
+    consommation VARCHAR(255) NOT NULL
+);
+

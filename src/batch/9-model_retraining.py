@@ -10,6 +10,7 @@ from os.path import dirname, abspath
 from datetime import timedelta, date
 from tcn import TCN, tcn_full_summary
 
+print('Démarrage script 9')
 
 # Répertoires
 data_dir = dirname(dirname(abspath(__file__)))+'/data/raw_4_dev_model/' 
@@ -144,4 +145,8 @@ with open(model_dir + 'model_' + jour_proc + '.json', "w") as json_file:
     json_file.write(model_as_json)
 # Enregistrement poids 
 model.save_weights(model_dir + 'weights_' + jour_proc + '.h5')
+
+print('Fin script 9, génération de ', model_dir + 'model_bretagne' + jour_proc + '.keras')
+print('et ', model_dir + 'model_' + jour_proc + '.json')
+print('et ', model_dir + 'weights_' + jour_proc + '.h5')
 
