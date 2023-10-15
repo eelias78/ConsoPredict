@@ -1,0 +1,41 @@
+[
+  {
+    "libelle_region": "Bretagne",
+    "code_insee_region": "53",
+    "date_model": "2023-09-17",
+    "statut_donnees": "temps r\u00e9el",
+    "date_perf_calcul": "2023-10-01",
+    "moyenne_pred": 107881.902734375,
+    "moyenne_reel": 91665.06666666667,
+    "ecart-type_pred": 8744.419122122817,
+    "ecart-type_reel": 9486.425821257562,
+    "MAE": 16268.499088541666,
+    "pct_dist_euclid": 20.814629403218575
+  },
+  {
+    "libelle_region": "Bretagne",
+    "code_insee_region": "53",
+    "date_model": "2023-09-03",
+    "statut_donnees": "temps r\u00e9el",
+    "date_perf_calcul": "2023-09-17",
+    "moyenne_pred": 112470.41001674107,
+    "moyenne_reel": 96951.35714285714,
+    "ecart-type_pred": 16296.699335451054,
+    "ecart-type_reel": 9155.343783879467,
+    "MAE": 16074.637416294643,
+    "pct_dist_euclid": 22.20456589749522
+  },
+  {
+    "libelle_region": "Bretagne",
+    "code_insee_region": "53",
+    "date_model": "2023-08-20",
+    "statut_donnees": "temps r\u00e9el",
+    "date_perf_calcul": "2023-09-03",
+    "moyenne_pred": 111580.8631417411,
+    "moyenne_reel": 103189.6428571429,
+    "ecart-type_pred": 14581.5598214171,
+    "ecart-type_reel": 15538.335195836242,
+    "MAE": 16867.2635323661,
+    "pct_dist_euclid": 21.5737352157
+  }
+]

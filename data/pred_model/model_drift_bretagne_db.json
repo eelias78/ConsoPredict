@@ -1,0 +1,14 @@
+[
+  {
+    "libelle_region": "Bretagne",
+    "code_insee_region": 53,
+    "date_model": "2023-08-20",
+    "statut_donnees": "consolid\u00e9es",
+    "date_perf_calcul": "2023-10-02",
+    "pct_dist_euclid": 17.1334213788,
+    "ecart-type_tps_reel": 15538.3351958362,
+    "ecart-type_per_mod": 8196.4731165923,
+    "moyenne_tps_reel": 103189.6428571429,
+    "moyenne_per_mod": 94134.1428571429
+  }
+]
