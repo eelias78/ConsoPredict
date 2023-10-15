@@ -41,7 +41,7 @@ def test_database_connection():
 test_database_connection()
 
 # Répertoire
-data_dir = dirname(dirname(abspath(__file__)))+'/data/pred_model/' # ML data 
+data_dir = dirname(dirname(abspath(__file__)))+'/data/raw_4_obs_tps_reel/' # ML data 
 # Création de la date du process
 now = datetime.now()
 dt_fic = now.strftime("%Y-%m-%d")

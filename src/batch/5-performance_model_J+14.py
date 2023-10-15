@@ -13,7 +13,8 @@ from sklearn.metrics import mean_absolute_error as MAE
 print('Démarrage script 5')
 
 # Répertoire
-data_dir = dirname(dirname(abspath(__file__))) + "/data/pred_model/"
+data_in_dir = dirname(dirname(abspath(__file__))) + "/data/pred_model/"
+data_out_dir = dirname(dirname(abspath(__file__))) + "/data/raw_obs_tps_reel/"
 
 # Création de la date du process
 now = datetime.now()
@@ -39,11 +40,11 @@ reel['statut_donnees'] = 'temps réel'
 reel['date_model'] = jour_deb
 reel.drop(['heure','date_heure','consommation'], axis=1, inplace=True)
 reel.drop(index=reel.index[-1],axis=0,inplace=True)
-reel.to_json(data_dir + 'obs_tps_reel_bretagne_'+ jour_proc + '.json', orient="records")
+reel.to_json(data_out_dir + 'obs_tps_reel_bretagne_'+ jour_proc + '.json', orient="records")
 #print(reel)
 
 # Récupération des prédictions et calcul de la conso moyenne sur la région
-predit=pd.read_json(data_dir + 'model_bretagne_db.json')
+predit=pd.read_json(data_in_dir + 'model_bretagne_db.json')
 predit['conso_moy_pred(MW)']= predit.groupby(['date prediction'])['conso(MW)'].transform('mean')
 predit= predit.groupby('date prediction').first().reset_index()
 predit['date prediction'] = pd.to_datetime(predit['date prediction']).dt.date
@@ -84,7 +85,7 @@ resultat_metrics=df_metrics.to_dict('records')
 print(df_metrics)
 
 
-def metrics_json(new_data, file_name= data_dir +'model_metrics_bretagne_db.json'):
+def metrics_json(new_data, file_name= data_in_dir +'model_metrics_bretagne_db.json'):
     with open(file_name, 'r') as infile:
         file_data = json.load(infile)
 
