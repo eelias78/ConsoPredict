@@ -41,7 +41,6 @@ reel['date_model'] = jour_deb
 reel.drop(['heure','date_heure','consommation'], axis=1, inplace=True)
 reel.drop(index=reel.index[-1],axis=0,inplace=True)
 reel.to_json(data_out_dir + 'obs_tps_reel_bretagne_'+ jour_proc + '.json', orient="records")
-#print(reel)
 
 # Récupération des prédictions et calcul de la conso moyenne sur la région
 predit=pd.read_json(data_in_dir + 'model_bretagne_db.json')
@@ -49,12 +48,10 @@ predit['conso_moy_pred(MW)']= predit.groupby(['date prediction'])['conso(MW)'].t
 predit= predit.groupby('date prediction').first().reset_index()
 predit['date prediction'] = pd.to_datetime(predit['date prediction']).dt.date
 predit.drop(['localite','jour predit','id jour','conso(MW)'],axis=1,inplace=True)
-#print(predit)
 
 # Réunion des prédictions et des observations
 comp=reel.merge(predit.loc[:, predit.columns != 'date model'], left_on ='date', right_on = 'date prediction', how = 'left')
 comp = comp.rename(columns = {"date prediction": "date_prediction"}) 
-#print(comp)
 
 # Calcul de l'indicateur MAE
 MAE=MAE(y_true=comp['conso_tps_reel(MW)'], y_pred=comp['conso_moy_pred(MW)'])
