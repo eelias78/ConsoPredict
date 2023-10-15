@@ -42,6 +42,7 @@ test_database_connection()
 
 # Répertoire
 data_dir = dirname(dirname(abspath(__file__)))+'/data/raw_4_obs_tps_reel/' # ML data 
+
 # Création de la date du process
 now = datetime.now()
 dt_fic = now.strftime("%Y-%m-%d")
@@ -96,8 +97,5 @@ def merge_JsonFiles(liste_fic):
         json.dump(merged_contents,outfile)
 
 merge_JsonFiles(liste_fic)
-
-#df = pd.read_json(data_dir +"obs_tps_reel_bretagne_db.json")
-#print(df.sort_values('date').reset_index(drop=True))
 
 print('Fin script 6 : mise à jour de ', data_dir +"obs_tps_reel_bretagne_db.json", ' et historisation en base de données')

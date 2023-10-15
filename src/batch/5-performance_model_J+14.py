@@ -14,7 +14,7 @@ print('Démarrage script 5')
 
 # Répertoire
 data_in_dir = dirname(dirname(abspath(__file__))) + "/data/pred_model/"
-data_out_dir = dirname(dirname(abspath(__file__))) + "/data/raw_obs_tps_reel/"
+data_out_dir = dirname(dirname(abspath(__file__))) + "/data/raw_4_obs_tps_reel/"
 
 # Création de la date du process
 now = datetime.now()
