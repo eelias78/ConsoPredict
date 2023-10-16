@@ -26,7 +26,7 @@ bretagne['feat_tmean'] = bretagne.apply(lambda x: ((x['tmax']+x['tmin'])/2 + 273
 # Variables nécesssaires
 bretagne=bretagne[['region','localite','code_insee','datetime','day','date model','feat_tmean']]
 
-# Calcul de la 2ème variable explicative :
+# TRansfo en date et calcul de la 2ème variable explicative :
 bretagne['datetime'] = pd.to_datetime(bretagne['datetime'].str[:10])
 bretagne['feat_month']= bretagne.datetime.dt.month
 
